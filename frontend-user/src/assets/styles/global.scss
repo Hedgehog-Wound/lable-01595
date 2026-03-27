@@ -1,0 +1,307 @@
+@use './variables.scss' as *;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: $font-size-md;
+  color: $text-primary;
+  background-color: $bg-primary;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// 滚动条样式
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: $bg-primary;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c0c4cc;
+  border-radius: 3px;
+  
+  &:hover {
+    background: #909399;
+  }
+}
+
+// 通用卡片样式
+.card {
+  background: $bg-card;
+  border-radius: $border-radius-md;
+  box-shadow: $shadow-sm;
+  padding: $spacing-lg;
+  
+  &-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: $spacing-md;
+    padding-bottom: $spacing-md;
+    border-bottom: 1px solid $border-color;
+    
+    .title {
+      font-size: $font-size-lg;
+      font-weight: 600;
+      color: $text-primary;
+    }
+  }
+}
+
+// 页面容器
+.page-container {
+  padding: $spacing-lg;
+  min-height: calc(100vh - #{$header-height} - 40px); // 减去 footer 高度
+  background: $bg-primary;
+  
+  @media (max-width: 768px) {
+    padding: $spacing-md;
+  }
+}
+
+// 卡片响应式
+.card {
+  @media (max-width: 768px) {
+    padding: $spacing-md;
+    
+    &-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: $spacing-sm;
+      
+      .title {
+        font-size: $font-size-md;
+      }
+    }
+  }
+}
+
+// 状态颜色
+.status {
+  &-success { color: $success-color; }
+  &-warning { color: $warning-color; }
+  &-danger { color: $danger-color; }
+  &-info { color: $info-color; }
+}
+
+// 过渡动画
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+// Element Plus 覆盖样式
+.el-form--inline {
+  .el-form-item {
+    margin-right: $spacing-md;
+    
+    @media (max-width: 768px) {
+      margin-right: 0;
+      margin-bottom: $spacing-sm;
+    }
+  }
+}
+
+.el-button {
+  &.is-link {
+    text-decoration: none;
+    
+    &:hover,
+    &:focus {
+      text-decoration: none;
+    }
+  }
+}
+
+// 表格操作按钮样式增强
+.el-table {
+  .el-button.is-link {
+    // 统一按钮大小和间距
+    &.el-button--small {
+      padding: 0 4px;
+      font-size: 12px;
+      height: auto;
+      line-height: 1.5;
+    }
+    
+    // primary 类型按钮
+    &.el-button--primary {
+      color: #409eff;
+      
+      &:hover {
+        color: #337ecc;
+      }
+    }
+    
+    // success 类型按钮
+    &.el-button--success {
+      color: #67c23a;
+      
+      &:hover {
+        color: #529b2e;
+      }
+    }
+    
+    // warning 类型按钮
+    &.el-button--warning {
+      color: #e6a23c;
+      
+      &:hover {
+        color: #b88230;
+      }
+    }
+    
+    // danger 类型按钮
+    &.el-button--danger {
+      color: #f56c6c;
+      
+      &:hover {
+        color: #c45656;
+      }
+    }
+    
+    // info 类型按钮
+    &.el-button--info {
+      color: #606266;
+      
+      &:hover {
+        color: #409eff;
+      }
+    }
+  }
+}
+
+.el-card {
+  border: none;
+  box-shadow: $shadow-sm;
+  
+  &:hover {
+    box-shadow: $shadow-md;
+  }
+}
+
+.el-table {
+  border-radius: $border-radius-md;
+  overflow: hidden;
+  
+  @media (max-width: 768px) {
+    font-size: $font-size-sm;
+    
+    .el-table__cell {
+      padding: 8px 4px;
+    }
+  }
+}
+
+.el-dialog {
+  border-radius: $border-radius-lg;
+  
+  .el-dialog__header {
+    display: flex;
+    align-items: center;
+    padding: $spacing-lg;
+    border-bottom: 1px solid $border-color;
+    
+    .el-dialog__title {
+      flex: 1;
+      font-size: $font-size-lg;
+      font-weight: 600;
+      color: $text-primary;
+    }
+    
+    .el-dialog__headerbtn {
+      position: static;
+      top: auto;
+      right: auto;
+      width: auto;
+      height: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      
+      .el-dialog__close {
+        font-size: 18px;
+        color: $text-secondary;
+        
+        &:hover {
+          color: $text-primary;
+        }
+      }
+    }
+  }
+  
+  .el-dialog__body {
+    padding: $spacing-lg;
+  }
+  
+  .el-dialog__footer {
+    padding: $spacing-md $spacing-lg;
+  }
+}
+
+// MessageBox 确认框样式统一
+.el-message-box {
+  border-radius: $border-radius-lg;
+  
+  .el-message-box__header {
+    display: flex;
+    align-items: center;
+    padding: 20px 20px 15px;
+    border-bottom: 1px solid $border-color;
+    
+    .el-message-box__title {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      line-height: 1;
+      font-size: $font-size-lg;
+      font-weight: 600;
+    }
+    
+    .el-message-box__headerbtn {
+      position: static;
+      top: auto;
+      right: auto;
+      width: auto;
+      height: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: auto;
+      
+      .el-message-box__close {
+        font-size: 16px;
+        color: $text-secondary;
+        
+        &:hover {
+          color: $text-primary;
+        }
+      }
+    }
+  }
+  
+  .el-message-box__content {
+    padding: 20px;
+  }
+  
+  .el-message-box__btns {
+    padding: 10px 20px 20px;
+  }
+}

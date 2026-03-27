@@ -1,0 +1,7 @@
+node_modules
+dist
+*.d.ts
+public
+.vscode
+.idea
+*.min.js

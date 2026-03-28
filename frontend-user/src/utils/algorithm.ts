@@ -42,12 +42,27 @@ function iqr(data: number[]): number {
  */
 export function statisticalTuning(
   historyData: MonitorData[],
-  params: TuningParams
+  params: TuningParams,
+  monitorType?: string
 ): { low: number; high: number; confidence: number } {
   const values = historyData.map(d => d.value)
   
   if (values.length < 10) {
-    return { low: 0, high: 100, confidence: 0.3 }
+    // 根据不同监测类型返回合理的默认阈值
+    switch (monitorType) {
+      case 'temperature':
+        return { low: 0, high: 100, confidence: 0.3 } // 温度: 0-100°C
+      case 'humidity':
+        return { low: 0, high: 100, confidence: 0.3 } // 湿度: 0-100%
+      case 'pressure':
+        return { low: 0, high: 10, confidence: 0.3 } // 压力: 0-10 MPa
+      case 'vibration':
+        return { low: 0, high: 10, confidence: 0.3 } // 振动: 0-10 mm/s
+      case 'flow':
+        return { low: 0, high: 100, confidence: 0.3 } // 流量: 0-100 m³/h
+      default:
+        return { low: 0, high: 100, confidence: 0.3 } // 默认值
+    }
   }
   
   const avg = mean(values)
@@ -75,12 +90,27 @@ export function statisticalTuning(
  */
 export function adaptiveTuning(
   historyData: MonitorData[],
-  params: TuningParams
+  params: TuningParams,
+  monitorType?: string
 ): { low: number; high: number; confidence: number } {
   const values = historyData.map(d => d.value)
   
   if (values.length < 10) {
-    return { low: 0, high: 100, confidence: 0.3 }
+    // 根据不同监测类型返回合理的默认阈值
+    switch (monitorType) {
+      case 'temperature':
+        return { low: 0, high: 100, confidence: 0.3 } // 温度: 0-100°C
+      case 'humidity':
+        return { low: 0, high: 100, confidence: 0.3 } // 湿度: 0-100%
+      case 'pressure':
+        return { low: 0, high: 10, confidence: 0.3 } // 压力: 0-10 MPa
+      case 'vibration':
+        return { low: 0, high: 10, confidence: 0.3 } // 振动: 0-10 mm/s
+      case 'flow':
+        return { low: 0, high: 100, confidence: 0.3 } // 流量: 0-100 m³/h
+      default:
+        return { low: 0, high: 100, confidence: 0.3 } // 默认值
+    }
   }
   
   const q1 = percentile(values, 25)
@@ -105,12 +135,13 @@ export function adaptiveTuning(
  */
 export function mlTuning(
   historyData: MonitorData[],
-  params: TuningParams
+  params: TuningParams,
+  monitorType?: string
 ): { low: number; high: number; confidence: number } {
   const values = historyData.map(d => d.value)
   
   if (values.length < 20) {
-    return statisticalTuning(historyData, params)
+    return statisticalTuning(historyData, params, monitorType)
   }
   
   // 计算移动平均
@@ -162,19 +193,19 @@ export function executeAutoTuning(
   
   switch (params.algorithm) {
     case 'statistical':
-      result = statisticalTuning(historyData, params)
+      result = statisticalTuning(historyData, params, monitor.type)
       reason = '基于统计学 3σ 原则计算，适用于正态分布数据'
       break
     case 'adaptive':
-      result = adaptiveTuning(historyData, params)
+      result = adaptiveTuning(historyData, params, monitor.type)
       reason = '基于 IQR 四分位距方法，对异常值更鲁棒'
       break
     case 'ml':
-      result = mlTuning(historyData, params)
+      result = mlTuning(historyData, params, monitor.type)
       reason = '基于移动平均和趋势分析，考虑数据变化趋势'
       break
     default:
-      result = statisticalTuning(historyData, params)
+      result = statisticalTuning(historyData, params, monitor.type)
       reason = '默认使用统计学方法'
   }
   

@@ -42,11 +42,20 @@ function iqr(data: number[]): number {
  */
 export function statisticalTuning(
   historyData: MonitorData[],
-  params: TuningParams
+  params: TuningParams,
+  monitor?: MonitorPoint
 ): { low: number; high: number; confidence: number } {
   const values = historyData.map(d => d.value)
   
   if (values.length < 10) {
+    // 当数据量不足时，使用监测点的原始阈值作为回退
+    if (monitor) {
+      return { 
+        low: monitor.minThreshold, 
+        high: monitor.maxThreshold, 
+        confidence: 0.3 
+      }
+    }
     return { low: 0, high: 100, confidence: 0.3 }
   }
   
@@ -75,11 +84,20 @@ export function statisticalTuning(
  */
 export function adaptiveTuning(
   historyData: MonitorData[],
-  params: TuningParams
+  params: TuningParams,
+  monitor?: MonitorPoint
 ): { low: number; high: number; confidence: number } {
   const values = historyData.map(d => d.value)
   
   if (values.length < 10) {
+    // 当数据量不足时，使用监测点的原始阈值作为回退
+    if (monitor) {
+      return { 
+        low: monitor.minThreshold, 
+        high: monitor.maxThreshold, 
+        confidence: 0.3 
+      }
+    }
     return { low: 0, high: 100, confidence: 0.3 }
   }
   
@@ -105,12 +123,13 @@ export function adaptiveTuning(
  */
 export function mlTuning(
   historyData: MonitorData[],
-  params: TuningParams
+  params: TuningParams,
+  monitor?: MonitorPoint
 ): { low: number; high: number; confidence: number } {
   const values = historyData.map(d => d.value)
   
   if (values.length < 20) {
-    return statisticalTuning(historyData, params)
+    return statisticalTuning(historyData, params, monitor)
   }
   
   // 计算移动平均
@@ -162,19 +181,19 @@ export function executeAutoTuning(
   
   switch (params.algorithm) {
     case 'statistical':
-      result = statisticalTuning(historyData, params)
+      result = statisticalTuning(historyData, params, monitor)
       reason = '基于统计学 3σ 原则计算，适用于正态分布数据'
       break
     case 'adaptive':
-      result = adaptiveTuning(historyData, params)
+      result = adaptiveTuning(historyData, params, monitor)
       reason = '基于 IQR 四分位距方法，对异常值更鲁棒'
       break
     case 'ml':
-      result = mlTuning(historyData, params)
+      result = mlTuning(historyData, params, monitor)
       reason = '基于移动平均和趋势分析，考虑数据变化趋势'
       break
     default:
-      result = statisticalTuning(historyData, params)
+      result = statisticalTuning(historyData, params, monitor)
       reason = '默认使用统计学方法'
   }
   

@@ -1,10 +1,19 @@
 import type { TuningParams, TuningResult } from '@/types/alarm'
-import type { MonitorData, MonitorPoint } from '@/types/monitor'
+import type { MonitorData, MonitorPoint, MonitorType } from '@/types/monitor'
 
 /**
  * 自动调参算法模块
  * 提供多种阈值优化算法
  */
+
+// 不同监控类型的默认阈值配置
+const DEFAULT_THRESHOLDS: Record<MonitorType, { low: number; high: number; confidence: number }> = {
+  temperature: { low: 0, high: 50, confidence: 0.3 },
+  humidity: { low: 20, high: 80, confidence: 0.3 },
+  pressure: { low: 0, high: 10, confidence: 0.3 },
+  vibration: { low: 0, high: 5, confidence: 0.3 },
+  flow: { low: 0, high: 100, confidence: 0.3 }
+}
 
 // 计算均值
 function mean(data: number[]): number {
@@ -42,12 +51,13 @@ function iqr(data: number[]): number {
  */
 export function statisticalTuning(
   historyData: MonitorData[],
-  params: TuningParams
+  params: TuningParams,
+  monitorType: MonitorType
 ): { low: number; high: number; confidence: number } {
   const values = historyData.map(d => d.value)
   
   if (values.length < 10) {
-    return { low: 0, high: 100, confidence: 0.3 }
+    return DEFAULT_THRESHOLDS[monitorType]
   }
   
   const avg = mean(values)
@@ -75,12 +85,13 @@ export function statisticalTuning(
  */
 export function adaptiveTuning(
   historyData: MonitorData[],
-  params: TuningParams
+  params: TuningParams,
+  monitorType: MonitorType
 ): { low: number; high: number; confidence: number } {
   const values = historyData.map(d => d.value)
   
   if (values.length < 10) {
-    return { low: 0, high: 100, confidence: 0.3 }
+    return DEFAULT_THRESHOLDS[monitorType]
   }
   
   const q1 = percentile(values, 25)
@@ -105,12 +116,13 @@ export function adaptiveTuning(
  */
 export function mlTuning(
   historyData: MonitorData[],
-  params: TuningParams
+  params: TuningParams,
+  monitorType: MonitorType
 ): { low: number; high: number; confidence: number } {
   const values = historyData.map(d => d.value)
   
   if (values.length < 20) {
-    return statisticalTuning(historyData, params)
+    return statisticalTuning(historyData, params, monitorType)
   }
   
   // 计算移动平均
@@ -162,19 +174,19 @@ export function executeAutoTuning(
   
   switch (params.algorithm) {
     case 'statistical':
-      result = statisticalTuning(historyData, params)
+      result = statisticalTuning(historyData, params, monitor.type)
       reason = '基于统计学 3σ 原则计算，适用于正态分布数据'
       break
     case 'adaptive':
-      result = adaptiveTuning(historyData, params)
+      result = adaptiveTuning(historyData, params, monitor.type)
       reason = '基于 IQR 四分位距方法，对异常值更鲁棒'
       break
     case 'ml':
-      result = mlTuning(historyData, params)
+      result = mlTuning(historyData, params, monitor.type)
       reason = '基于移动平均和趋势分析，考虑数据变化趋势'
       break
     default:
-      result = statisticalTuning(historyData, params)
+      result = statisticalTuning(historyData, params, monitor.type)
       reason = '默认使用统计学方法'
   }
   
